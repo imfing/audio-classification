@@ -6,7 +6,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import specgram
 import soundfile as sf
-import scipy.io as sio
 
 def extract_feature(file_name):
     X, sample_rate = sf.read(file_name, dtype='float32')
