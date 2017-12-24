@@ -1,3 +1,9 @@
+# coding= UTF-8
+#
+# Author: Fing
+# Date  : 2017-12-03
+#
+
 import numpy as np
 import keras
 from keras.models import Sequential
