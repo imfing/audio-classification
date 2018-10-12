@@ -15,6 +15,8 @@ from sklearn.model_selection import train_test_split
 X =  np.load('feat.npy')
 y =  np.load('label.npy').ravel()
 
+num_classes = np.max(y, axis=0)
+
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=0)
 
 # Build the Neural Network
@@ -23,15 +25,15 @@ model.add(Dense(512, activation='relu', input_dim=193))
 model.add(Dropout(0.5))
 model.add(Dense(512, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(10, activation='softmax'))
+model.add(Dense(num_classes, activation='softmax'))
 
 model.compile(optimizer='rmsprop',
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 # Convert label to onehot
-y_train = keras.utils.to_categorical(y_train-1, num_classes=10)
-y_test = keras.utils.to_categorical(y_test-1, num_classes=10)
+y_train = keras.utils.to_categorical(y_train-1, num_classes=num_classes)
+y_test = keras.utils.to_categorical(y_test-1, num_classes=num_classes)
 
 # Train and test
 model.fit(X_train, y_train, epochs=1000, batch_size=64)
