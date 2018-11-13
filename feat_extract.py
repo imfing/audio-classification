@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # coding= UTF-8
 #
 # Author: Fing
@@ -5,6 +6,7 @@
 #
 
 import glob
+import code
 import os
 import librosa
 import numpy as np
@@ -52,6 +54,17 @@ def parse_audio_files(parent_dir,sub_dirs,file_ext='*.ogg'):
         print("extract %s features done" % (sub_dir))
     return np.array(features), np.array(labels, dtype = np.int)
 
+def parse_predict_files(parent_dir,file_ext='*.ogg'):
+    features = np.empty((0,193))
+    filenames = []
+    for fn in glob.glob(os.path.join(parent_dir, file_ext)):
+        mfccs, chroma, mel, contrast,tonnetz = extract_feature(fn)
+        ext_features = np.hstack([mfccs,chroma,mel,contrast,tonnetz])
+        features = np.vstack([features,ext_features])
+        filenames.append(fn)
+        print("extract %s features done" % fn)
+    return np.array(features), np.array(filenames)
+
 def one_hot_encode(labels):
     n_labels = len(labels)
     n_unique_labels = len(np.unique(labels))
@@ -65,3 +78,10 @@ r.sort()
 features, labels = parse_audio_files('data', r)
 np.save('feat.npy', features)
 np.save('label.npy', labels)
+
+# Predict new
+r = os.listdir("predict/")
+r.sort()
+features, filenames = parse_predict_files('predict')
+np.save('predict_feat.npy', features)
+np.save('predict_filenames.npy', filenames)
