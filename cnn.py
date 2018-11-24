@@ -5,6 +5,9 @@
 # Date  : 2017-12-03
 #
 
+import code
+import time
+import argparse
 import numpy as np
 import keras
 from keras.models import Sequential
@@ -13,17 +16,23 @@ from keras.layers import Dense, Dropout
 from keras.layers import Embedding
 from keras.layers import Conv1D, GlobalAveragePooling1D, MaxPooling1D
 from keras.optimizers import SGD
-import code
 import os
 from sklearn.model_selection import train_test_split
 
-# Prepare the data
-X = np.load('feat.npy')
-y = np.load('label.npy').ravel()
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('-t', '--train',             action='store_true', help='train neural network with extracted features')
+parser.add_argument('-p', '--predict',           action='store_true', help='predict files in ./predict folder')
+parser.add_argument('-P', '--real-time-predict', action='store_true', help='predict sound in real time')
+args = parser.parse_args()
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=233)
+if args.train: 
+    # Prepare the data
+    args = parser.parse_args()
+    X = np.load('feat.npy')
+    y = np.load('label.npy').ravel()
 
-if not os.path.exists('trained_model.h5'):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=233)
+
     # Build the Neural Network
     model = Sequential()
     model.add(Conv1D(64, 3, activation='relu', input_shape=(193, 1)))
@@ -34,13 +43,7 @@ if not os.path.exists('trained_model.h5'):
     model.add(GlobalAveragePooling1D())
     model.add(Dropout(0.5))
     model.add(Dense(10, activation='softmax'))
-    model.compile(loss='categorical_crossentropy',
-                  optimizer='rmsprop',
-                  metrics=['accuracy'])
-
-    # Plot model
-    # from keras.utils import plot_model
-    # plot_model(model, to_file='model.png')
+    model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
     
     # Convert label to onehot
     y_train = keras.utils.to_categorical(y_train - 1, num_classes=10)
@@ -49,17 +52,57 @@ if not os.path.exists('trained_model.h5'):
     X_train = np.expand_dims(X_train, axis=2)
     X_test = np.expand_dims(X_test, axis=2)
 
-    model.fit(X_train, y_train, batch_size=64, epochs=10000)
+    start = time.time()
+    model.fit(X_train, y_train, batch_size=64, epochs=1000)
     score, acc = model.evaluate(X_test, y_test, batch_size=16)
 
     print('Test score:', score)
     print('Test accuracy:', acc)
+    print('Training took: %d seconds' % int(time.time() - start))
     model.save('trained_model.h5')
-else: 
-    model = keras.models.load_model('trained_model.h5')
 
-X_predict = np.load('predict_feat.npy')
-filenames = np.load('predict_filenames.npy')
-X_predict = np.expand_dims(X_predict, axis=2)
-pred = model.predict_classes(X_predict)
-for pair in list(zip(filenames, pred)): print(pair)
+elif args.predict: 
+    model = keras.models.load_model('trained_model.h5')
+    X_predict = np.load('predict_feat.npy')
+    filenames = np.load('predict_filenames.npy')
+    X_predict = np.expand_dims(X_predict, axis=2)
+    pred = model.predict_classes(X_predict)
+    for pair in list(zip(filenames, pred)): print(pair)
+
+elif args.real_time_predict: 
+    import sounddevice as sd
+    import soundfile as sf
+    import queue
+    import librosa
+    from feat_extract import *
+    model = keras.models.load_model('trained_model.h5')
+    try:
+        device_info = sd.query_devices(None, 'input')
+        sample_rate = int(device_info['default_samplerate'])
+        q = queue.Queue()
+        features = np.empty((0,193))
+        def callback(indata, frames, time, status): q.put(indata.copy())
+        with sd.InputStream(callback=callback):
+            print('Press Ctrl+C to stop the recording')
+            datas = []
+            while True: 
+                data = q.get()
+                datas.extend(data)
+                if len(datas) > 1000:
+                    code.interact(local=locals())
+                    mfccs, chroma, mel, contrast,tonnetz = extract_feature(X_sample_rate=(np.array(datas), sample_rate))
+                    print('Features extracted')
+                    datas = []
+                    ext_features = np.hstack([mfccs,chroma,mel,contrast,tonnetz])
+                    print('Features stacked')
+                    features = np.vstack([features,ext_features])
+                    print('Dimensions expanded')
+                    features = np.expand_dims(features, axis=2)
+                    pred = model.predict_classes(features)
+                    print('Prediction completed: ')
+                    for p in pred: print('%s Whistle' % ('' if p==0 else 'Not'))
+
+    except KeyboardInterrupt:
+        print('\nRecording finished: ')
+        parser.exit(0)
+    except Exception as e: parser.exit(type(e).__name__ + ': ' + str(e))

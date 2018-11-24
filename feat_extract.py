@@ -14,16 +14,16 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import specgram
 import soundfile as sf
 
-def extract_feature(file_name):
-    X, sample_rate = sf.read(file_name, dtype='float32')
-    if X.ndim > 1:
-        X = X[:,0]
+def extract_feature(file_name=None, X_sample_rate=None):
+    if file_name and not X_sample_rate: X, sample_rate = sf.read(file_name, dtype='float32')
+    elif not file_name and X_sample_rate: X, sample_rate = X_sample_rate
+    if X.ndim > 1: X = X[:,0]
     X = X.T
 
     # short term fourier transform
     stft = np.abs(librosa.stft(X))
 
-    # mfcc
+    # mfcc (mel-frequency cepstrum)
     mfccs = np.mean(librosa.feature.mfcc(y=X, sr=sample_rate, n_mfcc=40).T,axis=0)
 
     # chroma
@@ -72,16 +72,18 @@ def one_hot_encode(labels):
     one_hot_encode[np.arange(n_labels), labels] = 1
     return one_hot_encode
 
-# Get features and labels
-r = os.listdir("data/")
-r.sort()
-features, labels = parse_audio_files('data', r)
-np.save('feat.npy', features)
-np.save('label.npy', labels)
 
-# Predict new
-r = os.listdir("predict/")
-r.sort()
-features, filenames = parse_predict_files('predict')
-np.save('predict_feat.npy', features)
-np.save('predict_filenames.npy', filenames)
+if __name__ == '__main__':
+    # Get features and labels
+    r = os.listdir("data/")
+    r.sort()
+    features, labels = parse_audio_files('data', r)
+    np.save('feat.npy', features)
+    np.save('label.npy', labels)
+
+    # Predict new
+    r = os.listdir("predict/")
+    r.sort()
+    features, filenames = parse_predict_files('predict')
+    np.save('predict_feat.npy', features)
+    np.save('predict_filenames.npy', filenames)
