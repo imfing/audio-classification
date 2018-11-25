@@ -79,13 +79,6 @@ def parse_predict_files(parent_dir,file_ext='*.ogg'):
         print("extract %s features done" % fn)
     return np.array(features), np.array(filenames)
 
-def one_hot_encode(labels):
-    n_labels = len(labels)
-    n_unique_labels = len(np.unique(labels))
-    one_hot_encode = np.zeros((n_labels,n_unique_labels))
-    one_hot_encode[np.arange(n_labels), labels] = 1
-    return one_hot_encode
-
 def main():
     # Get features and labels
     r = os.listdir("data/")
