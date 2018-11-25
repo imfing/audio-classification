@@ -59,7 +59,7 @@ def train(args):
 
 def predict(args):
     if os.path.exists(args.model):
-        model = keras.models.load_model('trained_model.h5')
+        model = keras.models.load_model(args.model)
         X_predict = np.load('predict_feat.npy')
         filenames = np.load('predict_filenames.npy')
         X_predict = np.expand_dims(X_predict, axis=2)
@@ -75,20 +75,25 @@ def real_time_predict(args):
     import queue
     import librosa
     import sys
-    model = keras.models.load_model('trained_model.h5')
-    while True:
-        try:
-            features = np.empty((0,193))
-            mfccs, chroma, mel, contrast,tonnetz = extract_feature()
-            ext_features = np.hstack([mfccs,chroma,mel,contrast,tonnetz])
-            features = np.vstack([features,ext_features])
-            features = np.expand_dims(features, axis=2)
-            pred = model.predict_classes(features)
-            for p in pred: 
-                print(p)
-                sys.stdout.flush()
-        except KeyboardInterrupt: parser.exit(0)
-        except Exception as e: parser.exit(type(e).__name__ + ': ' + str(e))
+    if os.path.exists(args.model):
+        model = keras.models.load_model(args.model)
+        while True:
+            try:
+                features = np.empty((0,193))
+                mfccs, chroma, mel, contrast,tonnetz = extract_feature()
+                ext_features = np.hstack([mfccs,chroma,mel,contrast,tonnetz])
+                features = np.vstack([features,ext_features])
+                features = np.expand_dims(features, axis=2)
+                pred = model.predict_classes(features)
+                for p in pred: 
+                    print(p)
+                    sys.stdout.flush()
+            except KeyboardInterrupt: parser.exit(0)
+            except Exception as e: parser.exit(type(e).__name__ + ': ' + str(e))
+    elif input('Model not found. Train network first? (y/N)') in ['y', 'yes']: 
+        train()
+        real_time_predict(args)
+
 
 def main(args):
     if args.train: train(args)
@@ -97,10 +102,12 @@ def main(args):
 
 if __name__ == '__main__': 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('-t', '--train',             action='store_true', help='train neural network with extracted features')
-    parser.add_argument('-m', '--model',  metavar='path',   default='trained_model.h5', help='use this model path on train and predict operations')
-    parser.add_argument('-e', '--epochs', type=int, metavar='N',default=1000,   help='epochs to train')
-    parser.add_argument('-p', '--predict',           action='store_true', help='predict files in ./predict folder')
-    parser.add_argument('-P', '--real-time-predict', action='store_true', help='predict sound in real time')
+    parser.add_argument('-t', '--train',             action='store_true',            help='train neural network with extracted features')
+    parser.add_argument('-m', '--model', metavar='path', default='trained_model.h5', help='use this model path on train and predict operations')
+    parser.add_argument('-e', '--epochs', type=int, metavar='N',default=1000,        help='epochs to train')
+    parser.add_argument('-p', '--predict',           action='store_true',            help='predict files in ./predict folder')
+    parser.add_argument('-P', '--real-time-predict', action='store_true',            help='predict sound in real time')
+    parser.add_argument('-v', '--verbose',           action='store_true',            help='verbose print')
+    parser.add_argument('-s', '--log-speed',         action='store_true',            help='performance profiling')
     args = parser.parse_args()
     main(args)
