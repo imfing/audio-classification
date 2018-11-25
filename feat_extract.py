@@ -13,10 +13,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import specgram
 import soundfile as sf
+import sounddevice as sd
+import queue
 
-def extract_feature(file_name=None, X_sample_rate=None):
-    if file_name and not X_sample_rate: X, sample_rate = sf.read(file_name, dtype='float32')
-    elif not file_name and X_sample_rate: X, sample_rate = X_sample_rate
+def extract_feature(file_name=None):
+    if file_name: 
+        X, sample_rate = sf.read(file_name, dtype='float32')
+    else:  
+        device_info = sd.query_devices(None, 'input')
+        sample_rate = int(device_info['default_samplerate'])
+        q = queue.Queue()
+        def callback(i,f,t,s): q.put(i.copy())
+        data = []
+        with sd.InputStream(samplerate=sample_rate, callback=callback):
+            while True: 
+                if len(data) < 100000: data.extend(q.get())
+                else: break
+        X = np.array(data)
+
     if X.ndim > 1: X = X[:,0]
     X = X.T
 
@@ -42,8 +56,7 @@ def parse_audio_files(parent_dir,sub_dirs,file_ext='*.ogg'):
     features, labels = np.empty((0,193)), np.empty(0)
     for label, sub_dir in enumerate(sub_dirs):
         for fn in glob.glob(os.path.join(parent_dir, sub_dir, file_ext)):
-            try:
-                mfccs, chroma, mel, contrast,tonnetz = extract_feature(fn)
+            try: mfccs, chroma, mel, contrast,tonnetz = extract_feature(fn)
             except Exception as e:
                 print("[Error] extract feature error. %s" % (e))
                 continue

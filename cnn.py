@@ -20,9 +20,9 @@ import os
 from sklearn.model_selection import train_test_split
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('-t', '--train',             action='store_true', help='train neural network with extracted features')
-parser.add_argument('-p', '--predict',           action='store_true', help='predict files in ./predict folder')
-parser.add_argument('-P', '--real-time-predict', action='store_true', help='predict sound in real time')
+parser.add_argument('-t', '--train',             action='store_true',                          help='train neural network with extracted features')
+parser.add_argument('-p', '--predict',           action='store_true', nargs='?', default=1000, help='predict files in ./predict folder')
+parser.add_argument('-P', '--real-time-predict', action='store_true',                          help='predict sound in real time')
 args = parser.parse_args()
 
 if args.train: 
@@ -53,7 +53,7 @@ if args.train:
     X_test = np.expand_dims(X_test, axis=2)
 
     start = time.time()
-    model.fit(X_train, y_train, batch_size=64, epochs=1000)
+    model.fit(X_train, y_train, batch_size=64, epochs=args.p)
     score, acc = model.evaluate(X_test, y_test, batch_size=16)
 
     print('Test score:', score)
@@ -75,34 +75,18 @@ elif args.real_time_predict:
     import queue
     import librosa
     from feat_extract import *
+    import sys
     model = keras.models.load_model('trained_model.h5')
-    try:
-        device_info = sd.query_devices(None, 'input')
-        sample_rate = int(device_info['default_samplerate'])
-        q = queue.Queue()
-        features = np.empty((0,193))
-        def callback(indata, frames, time, status): q.put(indata.copy())
-        with sd.InputStream(callback=callback):
-            print('Press Ctrl+C to stop the recording')
-            datas = []
-            while True: 
-                data = q.get()
-                datas.extend(data)
-                if len(datas) > 1000:
-                    code.interact(local=locals())
-                    mfccs, chroma, mel, contrast,tonnetz = extract_feature(X_sample_rate=(np.array(datas), sample_rate))
-                    print('Features extracted')
-                    datas = []
-                    ext_features = np.hstack([mfccs,chroma,mel,contrast,tonnetz])
-                    print('Features stacked')
-                    features = np.vstack([features,ext_features])
-                    print('Dimensions expanded')
-                    features = np.expand_dims(features, axis=2)
-                    pred = model.predict_classes(features)
-                    print('Prediction completed: ')
-                    for p in pred: print('%s Whistle' % ('' if p==0 else 'Not'))
-
-    except KeyboardInterrupt:
-        print('\nRecording finished: ')
-        parser.exit(0)
-    except Exception as e: parser.exit(type(e).__name__ + ': ' + str(e))
+    while True:
+        try:
+            features = np.empty((0,193))
+            mfccs, chroma, mel, contrast,tonnetz = extract_feature()
+            ext_features = np.hstack([mfccs,chroma,mel,contrast,tonnetz])
+            features = np.vstack([features,ext_features])
+            features = np.expand_dims(features, axis=2)
+            pred = model.predict_classes(features)
+            for p in pred: 
+                print(p)
+                sys.stdout.flush()
+        except KeyboardInterrupt: parser.exit(0)
+        except Exception as e: parser.exit(type(e).__name__ + ': ' + str(e))
