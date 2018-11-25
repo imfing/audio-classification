@@ -17,12 +17,14 @@ from keras.layers import Embedding
 from keras.layers import Conv1D, GlobalAveragePooling1D, MaxPooling1D
 from keras.optimizers import SGD
 import os
+import os.path as op
 from sklearn.model_selection import train_test_split
 
 def train(args):
-    if not os.path.exists('feat.npy') or not os.path.exists('label.npy'): 
-        print('Run feat_extract.py first')
-        sys.exit(1)
+    if not op.exists('feat.npy') or not op.exists('label.npy'): 
+        if input('No feature/labels found. Run feat_extract.py first? (Y/n)').lower() in ['y', 'yes', '']:
+            feat_extract.main()
+            train(args)
     else:
         X = np.load('feat.npy')
         y = np.load('label.npy').ravel()
@@ -60,14 +62,15 @@ def train(args):
     model.save(args.model)
 
 def predict(args):
-    if os.path.exists(args.model):
+    if op.exists(args.model):
         model = keras.models.load_model(args.model)
-        X_predict = np.load('predict_feat.npy')
-        filenames = np.load('predict_filenames.npy')
+        predict_feat_path = 'predict_feat.npy'
+        predict_filenames = 'predict_filenames.npy'
+        filenames = np.load(predict_filenames)
         X_predict = np.expand_dims(X_predict, axis=2)
         pred = model.predict_classes(X_predict)
         for pair in list(zip(filenames, pred)): print(pair)
-    elif input('Model not found. Train network first? (y/N)') in ['y', 'yes']: 
+    elif input('Model not found. Train network first? (Y/n)').lower() in ['y', 'yes', '']: 
         train()
         predict(args)
 
@@ -77,11 +80,12 @@ def real_time_predict(args):
     import queue
     import librosa
     import sys
-    if os.path.exists(args.model):
+    if op.exists(args.model):
         model = keras.models.load_model(args.model)
         while True:
             try:
                 features = np.empty((0,193))
+                start = time.time()
                 mfccs, chroma, mel, contrast,tonnetz = extract_feature()
                 ext_features = np.hstack([mfccs,chroma,mel,contrast,tonnetz])
                 features = np.vstack([features,ext_features])
@@ -89,6 +93,7 @@ def real_time_predict(args):
                 pred = model.predict_classes(features)
                 for p in pred: 
                     print(p)
+                    if args.verbose: print('Time elapsed in real time feature extraction: ', time.time() - start)
                     sys.stdout.flush()
             except KeyboardInterrupt: parser.exit(0)
             except Exception as e: parser.exit(type(e).__name__ + ': ' + str(e))

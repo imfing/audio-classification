@@ -18,6 +18,7 @@ import queue
 
 def extract_feature(file_name=None):
     if file_name: 
+        print('Extracting', file_name)
         X, sample_rate = sf.read(file_name, dtype='float32')
     else:  
         device_info = sd.query_devices(None, 'input')
@@ -88,8 +89,6 @@ def main():
     np.save('label.npy', labels)
 
     # Predict new
-    r = os.listdir("predict/")
-    r.sort()
     features, filenames = parse_predict_files('predict')
     np.save('predict_feat.npy', features)
     np.save('predict_filenames.npy', filenames)
