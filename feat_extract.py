@@ -52,7 +52,9 @@ def extract_feature(file_name=None):
     tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate).T,axis=0)
     return mfccs,chroma,mel,contrast,tonnetz
 
-def parse_audio_files(parent_dir,sub_dirs,file_ext='*.ogg'):
+def parse_audio_files(parent_dir,file_ext='*.ogg'):
+    sub_dir = os.listdir(parent_dir)
+    sub_dir.sort()
     features, labels = np.empty((0,193)), np.empty(0)
     for label, sub_dir in enumerate(sub_dirs):
         if os.path.isdir(os.path.join(parent_dir, sub_dir)):
@@ -81,9 +83,7 @@ def parse_predict_files(parent_dir,file_ext='*.ogg'):
 
 def main():
     # Get features and labels
-    r = os.listdir("data/")
-    r.sort()
-    features, labels = parse_audio_files('data', r)
+    features, labels = parse_audio_files('data')
     np.save('feat.npy', features)
     np.save('label.npy', labels)
 

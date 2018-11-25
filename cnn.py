@@ -29,6 +29,8 @@ def train(args):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=233)
 
+    class_count = len(os.listdir('data/'))
+
     # Build the Neural Network
     model = Sequential()
     model.add(Conv1D(64, 3, activation='relu', input_shape=(193, 1)))
@@ -38,12 +40,12 @@ def train(args):
     model.add(Conv1D(128, 3, activation='relu'))
     model.add(GlobalAveragePooling1D())
     model.add(Dropout(0.5))
-    model.add(Dense(10, activation='softmax'))
+    model.add(Dense(class_count, activation='softmax'))
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
     
     # Convert label to onehot
-    y_train = keras.utils.to_categorical(y_train - 1, num_classes=10)
-    y_test = keras.utils.to_categorical(y_test - 1, num_classes=10)
+    y_train = keras.utils.to_categorical(y_train - 1, num_classes=class_count)
+    y_test = keras.utils.to_categorical(y_test - 1, num_classes=class_count)
 
     X_train = np.expand_dims(X_train, axis=2)
     X_test = np.expand_dims(X_test, axis=2)
