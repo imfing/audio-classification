@@ -6,7 +6,6 @@
 #
 
 import glob
-import code
 import os
 import librosa
 import numpy as np

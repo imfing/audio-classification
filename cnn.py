@@ -5,7 +5,6 @@
 # Date  : 2017-12-03
 #
 
-import code
 import time
 import argparse
 import numpy as np
