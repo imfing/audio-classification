@@ -92,7 +92,7 @@ def real_time_predict(args):
 
 def main(args):
     if args.train: train(args)
-    elif args.predict: predict()
+    elif args.predict: predict(args)
     elif args.real_time_predict: real_time_predict(args)
 
 if __name__ == '__main__': 
