@@ -29,8 +29,12 @@ args = parser.parse_args()
 if args.train: 
     # Prepare the data
     args = parser.parse_args()
-    X = np.load('feat.npy')
-    y = np.load('label.npy').ravel()
+    if not os.path.exists('feat.npy') or not os.path.exists('label.npy'): 
+        print('Run feat_extract.py first')
+        sys.exit(1)
+    else:
+        X = np.load('feat.npy')
+        y = np.load('label.npy').ravel()
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=233)
 

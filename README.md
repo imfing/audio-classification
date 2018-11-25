@@ -1,10 +1,10 @@
-# Environmental Sound Classification using Deep Learning
+# Whistle detection
 
-> A project from Digital Signal Processing course
+> A project inspired by a subset of [mtobeiyf/audio-classification](https://github.com/mtobeiyf/audio-classification)
 
 ## Dependencies
 
-- Python 2.7 (3.6 not tested)
+- Python 3.6
 - numpy
 - librosa
 - pysoundfile
@@ -15,13 +15,23 @@
 
 ## Dataset
 
-Dataset could be downloaded at [Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/YDEPUT) or [Github](https://github.com/karoldvl/ESC-50).
-
-I'd recommend use ESC-10 for the sake of convenience.
+```
+├── 001 - Cat
+│  ├── cat_1.ogg
+│  ├── cat_2.ogg
+│  ├── cat_3.ogg
+│  ... 
+...
+└── 002 - Dog
+   ├── dog_barking_0.ogg
+   ├── dog_barking_1.ogg
+   ├── dog_barking_2.ogg
+   ...
+```
 
 ## Feature Extraction
 
-Put audio files under `data` directory and run the following command:
+Put audio files (`.wav` untested) under `data` directory and run the following command:
 
 ```shell
 $ python feat_extract.py
