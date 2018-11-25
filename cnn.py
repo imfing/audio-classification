@@ -64,9 +64,9 @@ def predict(args):
         X_predict = np.expand_dims(X_predict, axis=2)
         pred = model.predict_classes(X_predict)
         for pair in list(zip(filenames, pred)): print(pair)
-    else: if input('Model not found. Train network first? (y/N)') in ['y', 'yes']: 
+    elif input('Model not found. Train network first? (y/N)') in ['y', 'yes']: 
         train()
-        predict()
+        predict(args)
 
 def real_time_predict(args):
     import sounddevice as sd
