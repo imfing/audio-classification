@@ -20,9 +20,9 @@ import os
 from sklearn.model_selection import train_test_split
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('-t', '--train',             action='store_true',                          help='train neural network with extracted features')
-parser.add_argument('-p', '--predict',           action='store_true', nargs='?', default=1000, help='predict files in ./predict folder')
-parser.add_argument('-P', '--real-time-predict', action='store_true',                          help='predict sound in real time')
+parser.add_argument('-t', '--train',             action='store_true',      help='train neural network with extracted features')
+parser.add_argument('-p', '--predict',            nargs='?', default=1000, help='predict files in ./predict folder')
+parser.add_argument('-P', '--real-time-predict', action='store_true',      help='predict sound in real time')
 args = parser.parse_args()
 
 if args.train: 
