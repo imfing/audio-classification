@@ -5,6 +5,7 @@
 # Date  : 2017-12-03
 #
 
+from feat_extract import *
 import time
 import argparse
 import numpy as np
@@ -73,7 +74,6 @@ def real_time_predict(args):
     import soundfile as sf
     import queue
     import librosa
-    from feat_extract import *
     import sys
     model = keras.models.load_model('trained_model.h5')
     while True:
