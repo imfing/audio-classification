@@ -54,7 +54,7 @@ if args.train:
     X_test = np.expand_dims(X_test, axis=2)
 
     start = time.time()
-    model.fit(X_train, y_train, batch_size=64, epochs=1000)
+    model.fit(X_train, y_train, batch_size=64, epochs=args.epochs)
     score, acc = model.evaluate(X_test, y_test, batch_size=16)
 
     print('Test score:', score)
