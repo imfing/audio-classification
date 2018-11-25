@@ -1,7 +1,6 @@
-# Whistle detection
+# Environmental Sound Classification using Deep Learning
 
-> A project inspired by a subset of [mtobeiyf/audio-classification](https://github.com/mtobeiyf/audio-classification)
-
+> A project from Digital Signal Processing course
 ## Dependencies
 
 - Python 3.6
@@ -14,6 +13,12 @@
 - keras
 
 ## Dataset
+
+Dataset could be downloaded at [Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/YDEPUT) or [Github](https://github.com/karoldvl/ESC-50).
+
+I'd recommend use ESC-10 for the sake of convenience.
+
+Example: 
 
 ```
 ├── 001 - Cat
@@ -33,9 +38,7 @@
 
 Put audio files (`.wav` untested) under `data` directory and run the following command:
 
-```shell
-$ python feat_extract.py
-```
+`python feat_extract.py`
 
 Features and labels will be generated and saved in the directory.
 
@@ -49,4 +52,7 @@ Install `tensorflow` and `keras` at first. Run `nn.py` to train and test the net
 
 ## Classify with Convolutional Neural Network
 
-Run `cnn.py` to train and test a CNN.
+- Run `cnn.py -t` to train and test a CNN. Optionally set how many epochs to train on.
+- Predict files by either:
+  - Putting target files under `predict/` directory and running `cnn.py -p`
+  - Recording on the fly with `cnn.py -P`
