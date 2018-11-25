@@ -86,7 +86,7 @@ def one_hot_encode(labels):
     one_hot_encode[np.arange(n_labels), labels] = 1
     return one_hot_encode
 
-if __name__ == '__main__':
+def main():
     # Get features and labels
     r = os.listdir("data/")
     r.sort()
@@ -100,3 +100,5 @@ if __name__ == '__main__':
     features, filenames = parse_predict_files('predict')
     np.save('predict_feat.npy', features)
     np.save('predict_filenames.npy', filenames)
+
+if __name__ == '__main__': main()
