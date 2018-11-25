@@ -20,9 +20,9 @@ import os
 from sklearn.model_selection import train_test_split
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('-t', '--train',             action='store_true',      help='train neural network with extracted features')
-parser.add_argument('-p', '--predict',            nargs='?', default=1000, help='predict files in ./predict folder')
-parser.add_argument('-P', '--real-time-predict', action='store_true',      help='predict sound in real time')
+parser.add_argument('-t', '--train',             action='store_true', help='train neural network with extracted features')
+parser.add_argument('-p', '--predict',           action='store_true', help='predict files in ./predict folder')
+parser.add_argument('-P', '--real-time-predict', action='store_true', help='predict sound in real time')
 args = parser.parse_args()
 
 if args.train: 
@@ -53,7 +53,7 @@ if args.train:
     X_test = np.expand_dims(X_test, axis=2)
 
     start = time.time()
-    model.fit(X_train, y_train, batch_size=64, epochs=args.p)
+    model.fit(X_train, y_train, batch_size=64, epochs=1000)
     score, acc = model.evaluate(X_test, y_test, batch_size=16)
 
     print('Test score:', score)
