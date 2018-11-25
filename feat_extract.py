@@ -53,8 +53,8 @@ def extract_feature(file_name=None):
     return mfccs,chroma,mel,contrast,tonnetz
 
 def parse_audio_files(parent_dir,file_ext='*.ogg'):
-    sub_dir = os.listdir(parent_dir)
-    sub_dir.sort()
+    sub_dirs = os.listdir(parent_dir)
+    sub_dirs.sort()
     features, labels = np.empty((0,193)), np.empty(0)
     for label, sub_dir in enumerate(sub_dirs):
         if os.path.isdir(os.path.join(parent_dir, sub_dir)):
