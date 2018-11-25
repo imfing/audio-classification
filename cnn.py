@@ -18,16 +18,7 @@ from keras.optimizers import SGD
 import os
 from sklearn.model_selection import train_test_split
 
-parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('-t', '--train',             action='store_true', help='train neural network with extracted features')
-parser.add_argument('-e', '--epochs', type=int, metavar='N',default=1000,   help='epochs to train')
-parser.add_argument('-p', '--predict',           action='store_true', help='predict files in ./predict folder')
-parser.add_argument('-P', '--real-time-predict', action='store_true', help='predict sound in real time')
-args = parser.parse_args()
-
-if args.train: 
-    # Prepare the data
-    args = parser.parse_args()
+def train(args):
     if not os.path.exists('feat.npy') or not os.path.exists('label.npy'): 
         print('Run feat_extract.py first')
         sys.exit(1)
@@ -63,17 +54,21 @@ if args.train:
     print('Test score:', score)
     print('Test accuracy:', acc)
     print('Training took: %d seconds' % int(time.time() - start))
-    model.save('trained_model.h5')
+    model.save(args.model)
 
-elif args.predict: 
-    model = keras.models.load_model('trained_model.h5')
-    X_predict = np.load('predict_feat.npy')
-    filenames = np.load('predict_filenames.npy')
-    X_predict = np.expand_dims(X_predict, axis=2)
-    pred = model.predict_classes(X_predict)
-    for pair in list(zip(filenames, pred)): print(pair)
+def predict(args):
+    if os.path.exists(args.model):
+        model = keras.models.load_model('trained_model.h5')
+        X_predict = np.load('predict_feat.npy')
+        filenames = np.load('predict_filenames.npy')
+        X_predict = np.expand_dims(X_predict, axis=2)
+        pred = model.predict_classes(X_predict)
+        for pair in list(zip(filenames, pred)): print(pair)
+    else: if input('Model not found. Train network first? (y/N)') in ['y', 'yes']: 
+        train()
+        predict()
 
-elif args.real_time_predict: 
+def real_time_predict(args):
     import sounddevice as sd
     import soundfile as sf
     import queue
@@ -94,3 +89,18 @@ elif args.real_time_predict:
                 sys.stdout.flush()
         except KeyboardInterrupt: parser.exit(0)
         except Exception as e: parser.exit(type(e).__name__ + ': ' + str(e))
+
+def main(args):
+    if args.train: train(args)
+    elif args.predict: predict()
+    elif args.real_time_predict: real_time_predict(args)
+
+if __name__ == '__main__': 
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-t', '--train',             action='store_true', help='train neural network with extracted features')
+    parser.add_argument('-m', '--model',  metavar='path',   default='trained_model.h5', help='use this model path on train and predict operations')
+    parser.add_argument('-e', '--epochs', type=int, metavar='N',default=1000,   help='epochs to train')
+    parser.add_argument('-p', '--predict',           action='store_true', help='predict files in ./predict folder')
+    parser.add_argument('-P', '--real-time-predict', action='store_true', help='predict sound in real time')
+    args = parser.parse_args()
+    main(args)
