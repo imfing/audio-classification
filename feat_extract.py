@@ -5,6 +5,7 @@
 # Date  : 2017-12-03
 #
 
+import code
 import glob
 import os
 import librosa
@@ -54,16 +55,17 @@ def extract_feature(file_name=None):
 def parse_audio_files(parent_dir,sub_dirs,file_ext='*.ogg'):
     features, labels = np.empty((0,193)), np.empty(0)
     for label, sub_dir in enumerate(sub_dirs):
-        for fn in glob.glob(os.path.join(parent_dir, sub_dir, file_ext)):
-            try: mfccs, chroma, mel, contrast,tonnetz = extract_feature(fn)
-            except Exception as e:
-                print("[Error] extract feature error. %s" % (e))
-                continue
-            ext_features = np.hstack([mfccs,chroma,mel,contrast,tonnetz])
-            features = np.vstack([features,ext_features])
-            # labels = np.append(labels, fn.split('/')[1])
-            labels = np.append(labels, label)
-        print("extract %s features done" % (sub_dir))
+        if os.path.isdir(os.path.join(parent_dir, sub_dir)):
+            for fn in glob.glob(os.path.join(parent_dir, sub_dir, file_ext)):
+                try: mfccs, chroma, mel, contrast,tonnetz = extract_feature(fn)
+                except Exception as e:
+                    print("[Error] extract feature error in %s. %s" % (fn,e))
+                    continue
+                ext_features = np.hstack([mfccs,chroma,mel,contrast,tonnetz])
+                features = np.vstack([features,ext_features])
+                # labels = np.append(labels, fn.split('/')[1])
+                labels = np.append(labels, label)
+            print("extract %s features done" % (sub_dir))
     return np.array(features), np.array(labels, dtype = np.int)
 
 def parse_predict_files(parent_dir,file_ext='*.ogg'):
@@ -83,7 +85,6 @@ def one_hot_encode(labels):
     one_hot_encode = np.zeros((n_labels,n_unique_labels))
     one_hot_encode[np.arange(n_labels), labels] = 1
     return one_hot_encode
-
 
 if __name__ == '__main__':
     # Get features and labels
