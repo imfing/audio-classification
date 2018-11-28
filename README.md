@@ -1,10 +1,9 @@
 # Environmental Sound Classification using Deep Learning
 
 > A project from Digital Signal Processing course
-
 ## Dependencies
 
-- Python 2.7 (3.6 not tested)
+- Python 3.6
 - numpy
 - librosa
 - pysoundfile
@@ -19,13 +18,27 @@ Dataset could be downloaded at [Dataverse](https://dataverse.harvard.edu/dataset
 
 I'd recommend use ESC-10 for the sake of convenience.
 
+Example: 
+
+```
+├── 001 - Cat
+│  ├── cat_1.ogg
+│  ├── cat_2.ogg
+│  ├── cat_3.ogg
+│  ... 
+...
+└── 002 - Dog
+   ├── dog_barking_0.ogg
+   ├── dog_barking_1.ogg
+   ├── dog_barking_2.ogg
+   ...
+```
+
 ## Feature Extraction
 
-Put audio files under `data` directory and run the following command:
+Put audio files (`.wav` untested) under `data` directory and run the following command:
 
-```shell
-$ python feat_extract.py
-```
+`python feat_extract.py`
 
 Features and labels will be generated and saved in the directory.
 
@@ -39,4 +52,7 @@ Install `tensorflow` and `keras` at first. Run `nn.py` to train and test the net
 
 ## Classify with Convolutional Neural Network
 
-Run `cnn.py` to train and test a CNN.
+- Run `cnn.py -t` to train and test a CNN. Optionally set how many epochs to train on.
+- Predict files by either:
+  - Putting target files under `predict/` directory and running `cnn.py -p`
+  - Recording on the fly with `cnn.py -P`
