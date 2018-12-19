@@ -18,14 +18,14 @@ Dataset could be downloaded at [Dataverse](https://dataverse.harvard.edu/dataset
 
 I'd recommend use ESC-10 for the sake of convenience.
 
-Example: 
+Example:
 
 ```
 ├── 001 - Cat
 │  ├── cat_1.ogg
 │  ├── cat_2.ogg
 │  ├── cat_3.ogg
-│  ... 
+│  ...
 ...
 └── 002 - Dog
    ├── dog_barking_0.ogg
@@ -46,7 +46,7 @@ Features and labels will be generated and saved in the directory.
 
 Make sure you have `scikit-learn` installed and `feat.npy` and `label.npy` under the same directory. Run `svm.py` and you could see the result.
 
-## Classify with Multilayer Perception
+## Classify with Multilayer Perceptron
 
 Install `tensorflow` and `keras` at first. Run `nn.py` to train and test the network.
 
