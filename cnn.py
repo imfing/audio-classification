@@ -6,6 +6,7 @@
 #
 
 import feat_extract
+from feat_extract import *
 import time
 import argparse
 import numpy as np
