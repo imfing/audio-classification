@@ -48,8 +48,8 @@ def train(args):
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 
     # Convert label to onehot
-    y_train = keras.utils.to_categorical(y_train - 1, num_classes=class_count)
-    y_test = keras.utils.to_categorical(y_test - 1, num_classes=class_count)
+    y_train = keras.utils.to_categorical(y_train, num_classes=class_count)
+    y_test = keras.utils.to_categorical(y_test, num_classes=class_count)
 
     X_train = np.expand_dims(X_train, axis=2)
     X_test = np.expand_dims(X_test, axis=2)
