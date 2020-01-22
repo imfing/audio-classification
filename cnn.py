@@ -32,7 +32,8 @@ def train(args):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=233)
 
-    class_count = len(os.listdir('data/'))
+    # Count the number of sub-directories in 'data'
+    class_count = len(next(os.walk('data/'))[1])
 
     # Build the Neural Network
     model = Sequential()

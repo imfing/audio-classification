@@ -7,6 +7,7 @@
 - numpy
 - librosa
 - pysoundfile
+- sounddevice
 - matplotlib
 - scikit-learn
 - tensorflow
